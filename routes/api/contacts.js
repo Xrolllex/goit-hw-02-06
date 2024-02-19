@@ -42,12 +42,21 @@ router.get('/:contactId', async (req, res) => {
 })
 
 router.post('/', async (req, res) => {
-  const validate = validateJoi(contact)  
-  const body = req.body
-    const contact = new Contacts(body)
-    
+  const body = req.body;
+  const validate = validateJoi(body);
+  
+  if (validate.error) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Validation failed", 
+      details: validate.error.details 
+    });
+  }
+
   try {
-    await validate.value.save();
+    const contact = new Contacts(validate.value);
+    await contact.save();
     res.json({
       status: "success",
       code: 201,
@@ -62,6 +71,7 @@ router.post('/', async (req, res) => {
     });
   }
 })
+
 
 router.delete('/:contactId', async (req, res) => {
   const { contactId } = req.params;
@@ -84,27 +94,52 @@ router.delete('/:contactId', async (req, res) => {
 })
 
 router.put('/:contactId', async (req, res) => {
-  const validate = validateJoi(contact);
-    const { contactId } = req.params;
-    const body = req.body;
-       
-    try {
-      const contact = await Contacts.findByIdAndUpdate({_id:contactId}, body);
-      await validate.value.save();
+  const { contactId } = req.params;
+  const body = req.body;
+  const validate = validateJoi(body); 
+
+    if (validate.error) {
+    return res.status(400).json({
+      status: "error",
+      code: 400,
+      message: "Validation failed",
+      details: validate.error.details
+    });
+  }
+
+  try {
+    const updatedContact = await Contacts.findByIdAndUpdate(
+      contactId, 
+      validate.value, 
+      { new: true } 
+    );
+
+    if (!updatedContact) {
+      return res.status(404).json({
+        status: "error",
+        code: 404,
+        message: "Contact not found"
+      });
+    }
+
+  
     res.json({
       status: "success",
       code: 200,
-      data: contact,
-      message: "You updated contact",
+      data: updatedContact,
+      message: "Contact updated successfully"
     });
   } catch (error) {
     res.status(400).json({
       status: "error",
       code: 400,
-      message: "Bad Request",
+      message: "Bad request",
+      error: error.message
     });
   }
-})
+});
+
+
 
 
 router.patch('/:contactId/favorite', async(req, res) => {
