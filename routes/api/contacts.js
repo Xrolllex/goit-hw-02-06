@@ -85,6 +85,7 @@ router.delete('/:contactId', async (req, res) => {
       message: "You deleted contact from your list",
     });
   } catch (error) {
+  console.log(error)
     res.status(400).json({
       status: "error",
       code: 400,
