@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const {Contacts} = require ("../schema")
-const { validateJoi } = require('./validation')
+const { validatePerson } = require('../validation')
 
 
 router.get('/', async (req, res) => {
@@ -43,7 +43,7 @@ router.get('/:contactId', async (req, res) => {
 
 router.post('/', async (req, res) => {
   const body = req.body;
-  const validate = validateJoi(body);
+  const validate = validatePerson(body);
   
   if (validate.error) {
     return res.status(400).json({
@@ -97,7 +97,7 @@ router.delete('/:contactId', async (req, res) => {
 router.put('/:contactId', async (req, res) => {
   const { contactId } = req.params;
   const body = req.body;
-  const validate = validateJoi(body); 
+  const validate = validatePerson(body); 
 
     if (validate.error) {
     return res.status(400).json({
@@ -122,8 +122,7 @@ router.put('/:contactId', async (req, res) => {
         message: "Contact not found"
       });
     }
-
-  
+ 
     res.json({
       status: "success",
       code: 200,
