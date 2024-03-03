@@ -2,11 +2,15 @@ const express = require('express')
 const router = express.Router()
 const {Contacts} = require ("../schema")
 const { validatePerson } = require('../validation')
+const {middleware} = require ('../../controllers/middleware')
 
+
+router.use(middleware);
 
 router.get('/', async (req, res) => {
    try{
-    const contacts = await Contacts.find()
+    const userId = req.user.id;
+    const contacts = await Contacts.find({owner: userId})
       res.json ({
       status: "success",
       code: 200,
@@ -23,8 +27,15 @@ router.get('/', async (req, res) => {
 
 router.get('/:contactId', async (req, res) => {
   const {contactId} = req.params;
+  const userId = req.user.id;
   try {
-    const contact = await Contacts.findById(contactId)
+        const contact = await Contacts.findOne({ _id: contactId, owner: userId })
+        if (!contact) {
+          return res.status(404).json({
+            status: "error",
+            message: "Contact not found or you do not have permission"
+          })
+        }
     res.json ({
       status: "success",
       code: 200,
@@ -43,6 +54,7 @@ router.get('/:contactId', async (req, res) => {
 
 router.post('/', async (req, res) => {
   const body = req.body;
+  const userId = req.user.id;
   const validate = validatePerson(body);
   
   if (validate.error) {
@@ -55,7 +67,7 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    const contact = new Contacts(validate.value);
+    const contact = new Contacts({...validate.value, owner: userId});
     await contact.save();
     res.json({
       status: "success",
@@ -75,9 +87,10 @@ router.post('/', async (req, res) => {
 
 router.delete('/:contactId', async (req, res) => {
   const { contactId } = req.params;
+  const userId = req.user.id;
   
   try {
-   const deleteContact = await Contacts.deleteOne({_id: contactId})
+   const deleteContact = await Contacts.deleteOne({ _id: contactId, owner: userId })
     res.json({
       status: "success",
       code: 200,
@@ -97,6 +110,7 @@ router.delete('/:contactId', async (req, res) => {
 router.put('/:contactId', async (req, res) => {
   const { contactId } = req.params;
   const body = req.body;
+  const userId = req.user.id;
   const validate = validatePerson(body); 
 
     if (validate.error) {
@@ -110,8 +124,8 @@ router.put('/:contactId', async (req, res) => {
 
   try {
     const updatedContact = await Contacts.findByIdAndUpdate(
-      contactId, 
-      validate.value, 
+      { _id: contactId, owner: userId }, 
+      { $set: validate.value }, 
       { new: true } 
     );
 
