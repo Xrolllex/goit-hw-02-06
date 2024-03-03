@@ -11,12 +11,7 @@ const middleware = async (req, res, next) => {
     });
   }
   const user = await authToken(auth);
-  const checkUser = await User.findOne({
-    _id: user.id,
-    password: user.password,
-    email: user.email,
-  }).lean();
-
+  
   if (!checkUser) {
     return res.json({
       status: "error",

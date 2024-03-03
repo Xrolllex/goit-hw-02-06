@@ -21,18 +21,19 @@ router.post("/signup", async (req, res) => {
       message: validate.error.message,
     });
   }
-  const checkUser = await User.findOne({ email }).lean();
-  if (checkUser) {
-    return res.json({
-      status: "error",
-      code: 409,
-      message: "Email in use",
-    });
-  }
   try {
+    const checkUser = await User.findOne({ email }).lean();
+    if (checkUser) {
+      return res.status(409).json({
+        status: "error",
+        message: "Email in use",
+      });
+    }
+ 
     const user = await new User({ email: validate.value.email });
     await user.setPassword(password);
     await user.save();
+    
     res.json({
       status: "success",
       code: 201,
