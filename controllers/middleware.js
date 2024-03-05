@@ -10,15 +10,18 @@ const middleware = async (req, res, next) => {
       message: "Token is empty",
     });
   }
+  
   const user = await authToken(auth);
   
-  if (!checkUser) {
+ 
+  if (!user) {
     return res.json({
       status: "error",
       code: 401,
       message: "User does not exist",
     });
   }
+  
   req.user = user;
   next();
 };

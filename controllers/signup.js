@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { User } = require("../routes/schema");
 const { validateUser } = require("../routes/validation");
+const gravatar = require("gravatar");
 
 router.post("/signup", async (req, res) => {
   const body = req.body;
@@ -13,6 +14,7 @@ router.post("/signup", async (req, res) => {
       message: "Email or password is empty",
     });
   }
+
   const validate = validateUser(body);
   if (validate.error) {
     return res.json({
@@ -29,8 +31,13 @@ router.post("/signup", async (req, res) => {
         message: "Email in use",
       });
     }
+
+    const avatar = gravatar.url(validate.value.email);
+        const user = await new User({
+        email: validate.value.email,
+        avatarURL: avatar,
+      });
  
-    const user = await new User({ email: validate.value.email });
     await user.setPassword(password);
     await user.save();
     
@@ -47,6 +54,6 @@ router.post("/signup", async (req, res) => {
       message: "Bad Request",
     });
   }
-});
+})
 
 module.exports = router;
