@@ -4,7 +4,7 @@ require("dotenv").config();
 const createToken = (id) => {
   const payload = { id };
   const secret = process.env.SECRET;
-  const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+  const token = jwt.sign(payload, secret, { expiresIn: "3d" });
   return token;
 };
 

@@ -8,6 +8,7 @@ const login = require("./controllers/login");
 const current = require("./controllers/current");
 const logout = require("./controllers/logout");
 const { middleware } = require("./controllers/middleware");
+const { avatars, upload } = require("./controllers/avatars");
 
 const app = express()
 
@@ -24,6 +25,7 @@ app.use("/api/users", signup);
 app.use("/api/users", login);
 app.use("/api/users", middleware, current);
 app.use("/api/users", middleware, logout);
+app.use("/api/users", middleware, upload.single("avatar"), avatars)
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Not found' })
