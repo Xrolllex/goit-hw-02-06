@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { User } = require("../routes/schema");
-const { createToken } = require("../routes/token");
+const { User } = require("../models/schema.js");
+const { createToken } = require("../models/token");
 
 router.post("/login", async (req, res) => {
   const body = req.body;
@@ -14,6 +14,16 @@ router.post("/login", async (req, res) => {
       message: "User with this email does not exist",
     });
   }
+
+  if (!user.verify) {
+    return res.json({
+      status: "error",
+      code: 404,
+      message: "User has not been verified",
+    });
+  }
+
+
   if (!user || !user.validPassword(password)) {
     return res.json({
       status: "error",

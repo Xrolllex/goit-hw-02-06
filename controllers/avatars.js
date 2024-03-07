@@ -2,7 +2,7 @@ const { promises: fs } = require('fs');
 const multer = require('multer');
 const Jimp = require('jimp');
 const path = require('path');
-const { User } = require('../routes/schema');
+const { User } = require('../models/schema.js');
 
 const dirname = path.join(__dirname, '..'); 
 const avatarsFolder = path.join(dirname, 'public', 'avatars');
@@ -26,7 +26,7 @@ const upload = multer({ storage, limits: { fileSize: 1024 * 1024 } });
 const processAvatar = async (tempPath, userId) => {
   const image = await Jimp.read(tempPath);
   await image.resize(250, Jimp.AUTO).quality(60); 
-  const avatarName = `${userId}-${Date.now()}.jpeg`;
+  const avatarName = `${userId}-${Date.now()}.jpg`;
   const avatarPath = path.join(avatarsFolder, avatarName);
   await image.writeAsync(avatarPath);
   return avatarName;
